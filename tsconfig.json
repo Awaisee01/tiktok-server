@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "moduleResolution": "node",
+    "module": "NodeNext",
+    "outDir": "dist",
+    "sourceMap": true
+  },
+  "include": ["server/**/*"],
+  "exclude": ["node_modules"]
+}
