@@ -893,7 +893,83 @@
     }
 
     // Download video function
-    async function downloadVideo() {
+  //   async function downloadVideo() {
+  // const urlInput = document.getElementById('tiktok-url');
+  // const downloadButton = document.getElementById('download-button');
+  // const statusMessage = document.getElementById('status-message');
+  // const errorMessage = document.getElementById('error-message');
+  
+  // const url = urlInput.value.trim();
+  
+  // if (!url) {
+  //   errorMessage.textContent = 'Please enter a TikTok URL';
+  //   errorMessage.style.display = 'block';
+  //   statusMessage.style.display = 'none';
+  //   return;
+  // }
+  
+  // // Show loading state
+  // downloadButton.disabled = true;
+  // downloadButton.innerHTML = `
+  //   <svg class="spinner" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  //     <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+  //   </svg>
+  //   Processing...
+  // `;
+  
+  // statusMessage.textContent = 'Processing...';
+  // statusMessage.style.display = 'block';
+  // errorMessage.style.display = 'none';
+  
+  // try {
+  //   const response = await fetch("/api/download", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json"          
+  //     },
+  //     body: JSON.stringify({
+  //       url: url,
+  //       withWatermark: false
+  //     })
+  //   });
+
+  //   const result = await response.json();
+
+  //   if (result.success) {
+  //     const videoUrl = result.data.url;
+      
+  //     // Create a temporary anchor tag to trigger download
+  //     const a = document.createElement("a");
+  //     a.href = videoUrl;
+  //     a.download = `tiktok-video-${Date.now()}.mp4`;
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     document.body.removeChild(a);
+      
+  //     statusMessage.textContent = 'Download started';
+  //   } else {
+  //     errorMessage.textContent = result.message || 'Failed to download video';
+  //     errorMessage.style.display = 'block';
+  //     statusMessage.style.display = 'none';
+  //   }
+  // } catch (err) {
+  //   console.error(err);
+  //   errorMessage.textContent = 'Failed to fetch the video';
+  //   errorMessage.style.display = 'block';
+  //   statusMessage.style.display = 'none';
+  // } finally {
+  //   // Reset button state
+  //   downloadButton.disabled = false;
+  //   downloadButton.innerHTML = `
+  //     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  //       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+  //       <polyline points="7 10 12 15 17 10"></polyline>
+  //       <line x1="12" y1="15" x2="12" y2="3"></line>
+  //     </svg>
+  //     Download Video
+  //   `;
+  // }
+async function downloadVideo() {
   const urlInput = document.getElementById('tiktok-url');
   const downloadButton = document.getElementById('download-button');
   const statusMessage = document.getElementById('status-message');
@@ -922,7 +998,8 @@
   errorMessage.style.display = 'none';
   
   try {
-    const response = await fetch("/api/download", {
+    const baseUrl = window.location.origin;
+    const response = await fetch(`${baseUrl}/api/download`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"          
@@ -938,15 +1015,21 @@
     if (result.success) {
       const videoUrl = result.data.url;
       
-      // Create a temporary anchor tag to trigger download
-      const a = document.createElement("a");
-      a.href = videoUrl;
-      a.download = `tiktok-video-${Date.now()}.mp4`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      
-      statusMessage.textContent = 'Download started';
+      // Improved download handling for mobile devices
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        // For mobile devices, open in new tab
+        statusMessage.textContent = 'Opening video... Right tap and select "Download"';
+        window.open(videoUrl, '_blank');
+      } else {
+        // For desktop, use programmatic download
+        const a = document.createElement("a");
+        a.href = videoUrl;
+        a.download = `tiktok-video-${Date.now()}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        statusMessage.textContent = 'Download started';
+      }
     } else {
       errorMessage.textContent = result.message || 'Failed to download video';
       errorMessage.style.display = 'block';
