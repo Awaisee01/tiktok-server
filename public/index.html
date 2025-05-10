@@ -6,11 +6,11 @@
   <title>TikTok Downloader</title>
 </head>
 <body>
-  <h1>TikTok Video Downloader</h1>
+  <h1>TikTok Video Downldd  oader</h1>
   <input type="text" id="videoUrl" placeholder="Enter TikTok video URL" size="50"/>
   <button onclick="downloadVideo()">Download</button>
   <p id="status"></p>
-  <script>
+  <!-- <script>
   async function downloadVideo() {
     const url = document.getElementById("videoUrl").value;
     const status = document.getElementById("status");
@@ -45,7 +45,47 @@
       status.textContent = "Failed to fetch the video.";
     }
   }
+</script> -->
+<script>
+  async function downloadVideo() {
+    const url = document.getElementById("videoUrl").value;
+    const status = document.getElementById("status");
+    status.textContent = "Processing...";
+
+    try {
+      // Determine the API URL dynamically based on the environment (production or development)
+      const apiUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000/api/download' : '/api/download';
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          url: url,
+          withWatermark: false // or true if needed
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        const videoUrl = result.data.url;
+        const a = document.createElement("a");
+        a.href = videoUrl;
+        a.download = "";
+        a.click();
+        status.textContent = "Download started.";
+      } else {
+        status.textContent = `Error: ${result.message}`;
+      }
+    } catch (err) {
+      console.error(err);
+      status.textContent = "Failed to fetch the video.";
+    }
+  }
 </script>
 
 </body>
-</html>
+</html> 
+
