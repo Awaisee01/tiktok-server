@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { getVideoData } from './tiktok';
+import { getVideoData } from './tiktok.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Enable CORS for all routes
