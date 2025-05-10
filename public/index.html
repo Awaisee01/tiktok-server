@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -6,57 +6,18 @@
   <title>TikTok Downloader</title>
 </head>
 <body>
-  <h1>TikTok Video Downldd  oader</h1>
+  <h1>TikTok Video Downloaddder</h1>
   <input type="text" id="videoUrl" placeholder="Enter TikTok video URL" size="50"/>
   <button onclick="downloadVideo()">Download</button>
   <p id="status"></p>
-  <!-- <script>
+  <script>
   async function downloadVideo() {
     const url = document.getElementById("videoUrl").value;
     const status = document.getElementById("status");
     status.textContent = "Processing...";
 
     try {
-      const response = await fetch("http://localhost:5000/api/download", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          url: url,
-          withWatermark: false // or true if needed
-        })
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        const videoUrl = result.data.url;
-        const a = document.createElement("a");
-        a.href = videoUrl;
-        a.download = "";
-        a.click();
-        status.textContent = "Download started.";
-      } else {
-        status.textContent = `Error: ${result.message}`;
-      }
-    } catch (err) {
-      console.error(err);
-      status.textContent = "Failed to fetch the video.";
-    }
-  }
-</script> -->
-<script>
-  async function downloadVideo() {
-    const url = document.getElementById("videoUrl").value;
-    const status = document.getElementById("status");
-    status.textContent = "Processing...";
-
-    try {
-      // Determine the API URL dynamically based on the environment (production or development)
-      const apiUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000/api/download' : '/api/download';
-
-      const response = await fetch(apiUrl, {
+      const response = await fetch("/api/download", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -88,4 +49,928 @@
 
 </body>
 </html> 
+ -->
 
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTokDownloader - Download TikTok Videos Without Watermark</title>
+  <style>
+    /* Global Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    a {
+      text-decoration: none;
+    }
+    
+    button {
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* Navbar Styles */
+    .navbar {
+      background-color: white;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    
+    .navbar-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 64px;
+      padding: 0 20px;
+    }
+    
+    .navbar-brand {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #db2777;
+    }
+    
+    .navbar-brand:hover {
+      color: #be185d;
+    }
+    
+    .navbar-links {
+      display: none;
+      align-items: center;
+      gap: 2rem;
+    }
+    
+    @media (min-width: 768px) {
+      .navbar-links {
+        display: flex;
+      }
+    }
+    
+    .nav-link {
+      color: #374151;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    
+    .nav-link:hover {
+      color: #db2777;
+    }
+    
+    .nav-button {
+      background-color: #db2777;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+    
+    .nav-button:hover {
+      background-color: #be185d;
+    }
+    
+    /* Hero Section */
+    .hero {
+      max-width: 42rem;
+      margin: 5rem auto 0;
+      background-color: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .hero-header {
+      background: linear-gradient(to right, #ec4899, #8b5cf6);
+      padding: 1.5rem;
+      color: white;
+    }
+    
+    .hero-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+    
+    .hero-subtitle {
+      color: #fbcfe8;
+    }
+    
+    .hero-content {
+      padding: 1.5rem;
+    }
+    
+    .input-group {
+      margin-bottom: 1rem;
+    }
+    
+    .input-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+    
+    .url-input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      font-size: 1rem;
+    }
+    
+    .url-input:focus {
+      outline: none;
+      border-color: #ec4899;
+      box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2);
+    }
+    
+    .download-button {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      color: white;
+      background-color: #db2777;
+      transition: background-color 0.2s;
+    }
+    
+    .download-button:hover {
+      background-color: #be185d;
+    }
+    
+    .download-button:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+    }
+    
+    .spinner {
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .status-message {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #eff6ff;
+      border-radius: 0.5rem;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+    }
+    
+    .error-message {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #fef2f2;
+      border-radius: 0.5rem;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+    }
+    
+    .how-to {
+      background-color: #f9fafb;
+      padding: 1.5rem;
+      border-top: 1px solid #e5e7eb;
+    }
+    
+    .how-to-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #1f2937;
+    }
+    
+    .how-to-list {
+      list-style-position: inside;
+      color: #4b5563;
+    }
+    
+    .how-to-list li {
+      margin-bottom: 0.75rem;
+    }
+    
+    /* Sections */
+    .section {
+      padding: 3rem 1rem;
+    }
+    
+    .section-title {
+      font-size: 1.875rem;
+      font-weight: bold;
+      color: #111827;
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+    
+    .section-subtitle {
+      font-size: 1.125rem;
+      color: #4b5563;
+      text-align: center;
+      max-width: 42rem;
+      margin: 0 auto 3rem;
+    }
+    
+    /* How It Works */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      max-width: 56rem;
+      margin: 0 auto;
+    }
+    
+    @media (min-width: 640px) {
+      .steps-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .steps-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    .step-card {
+      background-color: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      transition: box-shadow 0.2s;
+    }
+    
+    .step-card:hover {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .step-number {
+      width: 3.5rem;
+      height: 3.5rem;
+      background-color: #fce7f3;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #db2777;
+    }
+    
+    .step-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    
+    .step-description {
+      font-size: 0.875rem;
+      color: #4b5563;
+      text-align: center;
+    }
+    
+    /* Features */
+    .features-section {
+      background-color: #f9fafb;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      max-width: 80rem;
+      margin: 0 auto;
+    }
+    
+    @media (min-width: 640px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .features-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+      }
+    }
+    
+    .feature-card {
+      background-color: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+    }
+    
+    .feature-card:hover {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .feature-icon {
+      color: #db2777;
+      margin-bottom: 0.75rem;
+    }
+    
+    .feature-icon svg {
+      width: 2rem;
+      height: 2rem;
+    }
+    
+    .feature-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 0.5rem;
+    }
+    
+    .feature-description {
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+    
+    /* FAQs */
+    .faqs-section {
+      background-color: #f9fafb;
+    }
+    
+    .faq-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      transition: all 0.2s;
+      margin-bottom: 0.75rem;
+    }
+    
+    .faq-button {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      text-align: left;
+      background-color: white;
+      transition: background-color 0.2s;
+    }
+    
+    .faq-button:hover {
+      background-color: #f9fafb;
+    }
+    
+    .faq-question {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #111827;
+    }
+    
+    @media (min-width: 640px) {
+      .faq-question {
+        font-size: 1rem;
+        font-weight: 600;
+      }
+    }
+    
+    .faq-arrow {
+      width: 1rem;
+      height: 1rem;
+      transition: transform 0.2s;
+    }
+    
+    .faq-arrow.rotate {
+      transform: rotate(180deg);
+    }
+    
+    .faq-answer {
+      padding: 0 1rem 1rem;
+      background-color: white;
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+    
+    /* Footer */
+    .footer {
+      background-color: #111827;
+      color: white;
+      padding: 2rem 0;
+    }
+    
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    @media (min-width: 768px) {
+      .footer-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    
+    .footer-brand {
+      grid-column: span 2;
+    }
+    
+    @media (min-width: 768px) {
+      .footer-brand {
+        grid-column: span 1;
+      }
+    }
+    
+    .footer-title {
+      font-size: 1.125rem;
+      font-weight: bold;
+      margin-bottom: 0.75rem;
+    }
+    
+    .footer-text {
+      font-size: 0.875rem;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+    }
+    
+    .footer-links {
+      list-style: none;
+    }
+    
+    .footer-link {
+      font-size: 0.875rem;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+      display: block;
+      transition: color 0.2s;
+    }
+    
+    .footer-link:hover {
+      color: white;
+    }
+    
+    .footer-divider {
+      border-top: 1px solid #1f2937;
+      padding-top: 1.5rem;
+      text-align: center;
+      font-size: 0.875rem;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container navbar-container">
+      <button class="navbar-brand" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
+        TikTokDownloader
+      </button>
+      
+      <div class="navbar-links">
+        <button class="nav-link" onclick="scrollToSection('download')">Download</button>
+        <button class="nav-link" onclick="scrollToSection('how-it-works')">How It Works</button>
+        <button class="nav-link" onclick="scrollToSection('features')">Features</button>
+        <button class="nav-link" onclick="scrollToSection('faqs')">FAQs</button>
+        <button class="nav-button" onclick="scrollToSection('get-started')">Get Started</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section (Downloader) -->
+  <section id="download" class="hero">
+    <div class="hero-header">
+      <div class="flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <div>
+          <h1 class="hero-title">Download TikTok videos in HD</h1>
+          <p class="hero-subtitle">Download HD videos without watermark</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-content">
+      <div class="space-y-4">
+        <div class="input-group">
+          <label for="tiktok-url" class="input-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            TikTok Video URL
+          </label>
+          <input
+            id="tiktok-url"
+            type="url"
+            placeholder="https://www.tiktok.com/@username/video/1234567890"
+            class="url-input"
+            required
+          />
+        </div>
+
+        <button id="download-button" class="download-button" onclick="downloadVideo()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download Video
+        </button>
+      </div>
+
+      <div id="status-message" class="status-message" style="display: none;"></div>
+      <div id="error-message" class="error-message" style="display: none;"></div>
+    </div>
+
+    <div class="how-to">
+      <h3 class="how-to-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        </svg>
+        How to Download
+      </h3>
+      <ol class="how-to-list">
+        <li>Copy the link from TikTok app (tap Share then Copy link)</li>
+        <li>Paste the URL above</li>
+        <li>Click Download Video</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="section">
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-subtitle">Download TikTok videos in just 3 easy steps</p>
+    
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <h3 class="step-title">Copy Link</h3>
+        <p class="step-description">Open TikTok app and copy the video link</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <h3 class="step-title">Paste URL</h3>
+        <p class="step-description">Paste the URL in our downloader</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <h3 class="step-title">Download</h3>
+        <p class="step-description">Click download and save your video</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="section features-section">
+    <h2 class="section-title">Amazing Features</h2>
+    <p class="section-subtitle">Everything you need to download TikTok videos</p>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path>
+          </svg>
+        </div>
+        <h3 class="feature-title">HD Quality</h3>
+        <p class="feature-description">Download videos in highest available resolution (up to 1080p)</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l8-8m0 0l-8-8m8 8H4"></path>
+          </svg>
+        </div>
+        <h3 class="feature-title">Fast Downloads</h3>
+        <p class="feature-description">Get your videos instantly with our high-speed servers</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+          </svg>
+        </div>
+        <h3 class="feature-title">No Watermark</h3>
+        <p class="feature-description">Remove TikTok watermark from your downloaded videos</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+          </svg>
+        </div>
+        <h3 class="feature-title">Free Forever</h3>
+        <p class="feature-description">100% free service with no hidden charges</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <h3 class="feature-title">No Registration</h3>
+        <p class="feature-description">Download without creating an account</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+          </svg>
+        </div>
+        <h3 class="feature-title">All Devices</h3>
+        <p class="feature-description">Works on PC, Mac, Android & iOS</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQs Section -->
+  <section id="faqs" class="section faqs-section">
+    <h2 class="section-title">Frequently Asked Questions</h2>
+    <p class="section-subtitle">Find answers to common questions</p>
+    
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <div class="faq-item">
+        <button class="faq-button" onclick="toggleFAQ(0)">
+          <h3 class="faq-question">Is this TikTok downloader free to use?</h3>
+          <svg class="faq-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div id="faq-answer-0" class="faq-answer" style="display: none;">
+          <p>Yes, our service is completely free with no hidden charges. You can download as many videos as you want without paying anything.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <button class="faq-button" onclick="toggleFAQ(1)">
+          <h3 class="faq-question">How do I download TikTok videos without watermark?</h3>
+          <svg class="faq-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div id="faq-answer-1" class="faq-answer" style="display: none;">
+          <p>Simply paste the TikTok video URL, select 'Without Watermark' option, and click download. We'll remove the watermark automatically.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <button class="faq-button" onclick="toggleFAQ(2)">
+          <h3 class="faq-question">What video quality can I download?</h3>
+          <svg class="faq-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div id="faq-answer-2" class="faq-answer" style="display: none;">
+          <p>We provide the highest available quality for each video, typically up to 1080p HD resolution when available.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <button class="faq-button" onclick="toggleFAQ(3)">
+          <h3 class="faq-question">Can I download private TikTok videos?</h3>
+          <svg class="faq-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div id="faq-answer-3" class="faq-answer" style="display: none;">
+          <p>No, our tool only works with public TikTok videos. Private videos require login credentials which we don't support.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <button class="faq-button" onclick="toggleFAQ(4)">
+          <h3 class="faq-question">Is there a limit on how many videos I can download?</h3>
+          <svg class="faq-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div id="faq-answer-4" class="faq-answer" style="display: none;">
+          <p>No, there are no limits. You can download unlimited TikTok videos using our service.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <button class="faq-button" onclick="toggleFAQ(5)">
+          <h3 class="faq-question">Do I need to install any software?</h3>
+          <svg class="faq-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div id="faq-answer-5" class="faq-answer" style="display: none;">
+          <p>No installation needed! Our tool works directly in your web browser on any device.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3 class="footer-title">TikTokDownloader</h3>
+          <p class="footer-text">
+            Download TikTok videos without watermark in HD quality
+          </p>
+        </div>
+        
+        <div>
+          <h4 class="footer-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><button class="footer-link" onclick="scrollToSection('download')">Home</button></li>
+            <li><button class="footer-link" onclick="scrollToSection('how-it-works')">How It Works</button></li>
+            <li><button class="footer-link" onclick="scrollToSection('features')">Features</button></li>
+            <li><button class="footer-link" onclick="scrollToSection('faqs')">FAQs</button></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="footer-title">Legal</h4>
+          <ul class="footer-links">
+            <li><a href="#" class="footer-link">Privacy Policy</a></li>
+            <li><a href="#" class="footer-link">Terms of Service</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="footer-title">Contact</h4>
+          <p class="footer-text">datanews553@gmail.com</p>
+        </div>
+      </div>
+      
+      <div class="footer-divider">
+        <p>© <span id="current-year"></span> TikTokDownloader. All rights reserved by Data News.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Set current year in footer
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Scroll to section function
+    function scrollToSection(sectionId) {
+      if (window.location.pathname === '/') {
+        const section = document.getElementById(sectionId);
+        if (section) {
+          const yOffset = -80; // Adjust for header height
+          const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      } else {
+        window.location.href = `/#${sectionId}`;
+      }
+    }
+
+    // Check for hash on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.location.pathname === '/' && window.location.hash) {
+        const hash = window.location.hash.substring(1);
+        setTimeout(() => {
+          scrollToSection(hash);
+        }, 100);
+      }
+    });
+
+    // FAQ toggle function
+    function toggleFAQ(index) {
+      const answer = document.getElementById(`faq-answer-${index}`);
+      const arrow = document.querySelector(`#faq-answer-${index}`).previousElementSibling.querySelector('.faq-arrow');
+      
+      if (answer.style.display === 'none' || !answer.style.display) {
+        answer.style.display = 'block';
+        arrow.classList.add('rotate');
+      } else {
+        answer.style.display = 'none';
+        arrow.classList.remove('rotate');
+      }
+    }
+
+    // Download video function
+    async function downloadVideo() {
+  const urlInput = document.getElementById('tiktok-url');
+  const downloadButton = document.getElementById('download-button');
+  const statusMessage = document.getElementById('status-message');
+  const errorMessage = document.getElementById('error-message');
+  
+  const url = urlInput.value.trim();
+  
+  if (!url) {
+    errorMessage.textContent = 'Please enter a TikTok URL';
+    errorMessage.style.display = 'block';
+    statusMessage.style.display = 'none';
+    return;
+  }
+  
+  // Show loading state
+  downloadButton.disabled = true;
+  downloadButton.innerHTML = `
+    <svg class="spinner" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+    </svg>
+    Processing...
+  `;
+  
+  statusMessage.textContent = 'Processing...';
+  statusMessage.style.display = 'block';
+  errorMessage.style.display = 'none';
+  
+  try {
+    const response = await fetch("/api/download", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"          
+      },
+      body: JSON.stringify({
+        url: url,
+        withWatermark: false
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      const videoUrl = result.data.url;
+      
+      // Create a temporary anchor tag to trigger download
+      const a = document.createElement("a");
+      a.href = videoUrl;
+      a.download = `tiktok-video-${Date.now()}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      statusMessage.textContent = 'Download started';
+    } else {
+      errorMessage.textContent = result.message || 'Failed to download video';
+      errorMessage.style.display = 'block';
+      statusMessage.style.display = 'none';
+    }
+  } catch (err) {
+    console.error(err);
+    errorMessage.textContent = 'Failed to fetch the video';
+    errorMessage.style.display = 'block';
+    statusMessage.style.display = 'none';
+  } finally {
+    // Reset button state
+    downloadButton.disabled = false;
+    downloadButton.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      Download Video
+    `;
+  }
+
+    }
+  </script>
+</body>
+</html>
